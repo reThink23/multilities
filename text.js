@@ -129,4 +129,4 @@ const splitEqually = (text, numberOfChunks) => {
 }
 
 
-export { rsplit, removeLastWord, capText, deriveAbbr, pad, splitEvery };
+export { rsplit, removeLastWord, capText, deriveAbbr, pad, splitEvery, splitEqually };

@@ -23,15 +23,16 @@ const invertColor = (hex) => {
 /**
  * Gets the contrast color for a given hex color.
  * @param {String} hex The hex color to get the contrast color for.
- * @returns {String} The contrast color.
+ * @param {Number} [treshold=150] The treshold to use for the contrast color. Default is 150.
+ * @returns {String} The contrast color. Either Black ('#000000') or White ('#FFFFFF').
  * @example
  * getContrast("#FF0000") // "#FFFFFF"
  * getContrast("#000000") // "#FFFFFF"
  * getContrast("#FFFFFF") // "#000000"
 */
-const getContrast = (hex) => {
+const getContrast = (hex, treshold=150) => {
 	let { r, g, b } = hexToRgb(hex);
-	return (r * 0.299 + g * 0.587 + b * 0.114) > 150 ? '#000000' : '#FFFFFF';
+	return (r * 0.299 + g * 0.587 + b * 0.114) > treshold ? '#000000' : '#FFFFFF';
 }
 
 /**
@@ -48,7 +49,7 @@ const getContrast = (hex) => {
 const hexToRgb = (hex) => {
 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 	let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-	let hex = hex.replace(shorthandRegex, (m, r, g, b) => {
+	hex = hex.replace(shorthandRegex, (m, r, g, b) => {
 		return r + r + g + g + b + b;
 	});
 	const rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
