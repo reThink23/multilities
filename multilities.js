@@ -129,6 +129,10 @@ const splitEqually = (text, numberOfChunks) => {
 }
 
 
+
+
+
+
 /* ----------------------------------- CASE --------------------------------- */
 
 /**
@@ -210,6 +214,9 @@ const toTitleCase = (text) => {
 		return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 	});
 }
+
+
+
 
 
 /* ----------------------------------- CSS --------------------------------- */
@@ -382,6 +389,9 @@ const setCSSVar = (name, value, el = document.documentElement) => {
 }
 
 
+
+
+
 /* ----------------------------------- PARAMS --------------------------------- */
 
 /**
@@ -484,6 +494,9 @@ const setParam = (key, value, url = null, update = false) => {
 }
 
 
+
+
+
 /* ----------------------------------- OBJECT --------------------------------- */
 
 /**
@@ -499,6 +512,9 @@ const setParam = (key, value, url = null, update = false) => {
 const getKeyByValue = (object, value) => {
 	return Object.keys(object).find(key => object[key] === value);
 }
+
+
+
 
 
 /* ----------------------------------- MATH --------------------------------- */
