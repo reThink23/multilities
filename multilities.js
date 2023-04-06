@@ -1,6 +1,35 @@
 /* ----------------------------------- TEXT --------------------------------- */
 
 /**
+ * Counts the number of occurrences of the specified character in the text.
+ * @param {String} text The text to be searched.
+ * @param {String} occurence The character to be searched for.
+ * @param {Boolean} [allowOverlapping=false] If true, overlapping occurrences will be counted. Defaults to false.
+ * @returns {Number} The number of occurrences of the character in the text.
+ * @example
+ * count("This is a long text", "i") // 3
+ * // Note: This function is case sensitive.
+ * // Note: uses regex, so it is not recommended to use this function for large texts.
+ */
+const count = (text, occurrence, allowOverlapping = false) => {
+	if (occurrence.length <= 0) return false;
+
+	let n = 0, pos = 0,
+		step = allowOverlapping ? 1 : occurrence.length;
+
+	while (true) {
+		pos = text.indexOf(occurrence, pos);
+		if (pos >= 0) {
+			++n;
+			pos += step;
+		} else break;
+	}
+	return n;
+	// return (text.match(new RegExp(occurence, "g")) || []).length;
+	// return text.split(occurrence).length - 1;
+}
+
+/**
  * Split the text by the delimiter, but only split the text from the right.
  * @param {String} text The text to be split.
  * @param {String} [delimiter=" "] The delimiter to split the text by. Defaults to space.
@@ -9,6 +38,10 @@
  * rsplit("This is a long text", " ") // ["text", "long", "a", "is", "This"]
  */
 const rsplit = (text, delimiter = " ") => {
+	return text.split(delimiter).reverse();
+}
+
+const rsplit2 = (text, delimiter = " ") => {
 	let result = [];
 	for (let i = text.length; i > 0; i--) {
 		if (text[i] === delimiter) {
@@ -19,8 +52,21 @@ const rsplit = (text, delimiter = " ") => {
 	return result;
 }
 
-const rsplit2 = (text, delimiter = " ") => {
-	return text.split(delimiter).reverse();
+/**
+ * Reverse the text. Optionally reverse every n characters.
+ * @param {String} text The text to be reversed.
+ * @param {Number} [every=1] Reverse {@link every} characters. Defaults to 1.
+ * @returns {String} The reversed text.
+ * @example
+ * reverse("123456789") // "987654321"
+ * reverse("123456789", 3) // "789456123"
+*/
+const reverse = (text, every = 1) => {
+	let result = "";
+	for (let i = 0; i < text.length; i+=every) {
+		result = text.substring(i, i+every) + result;
+	}
+	return result;
 }
 
 /**
@@ -94,16 +140,21 @@ const pad = (text, length, char) => {
  * Splits the text into chunks of the specified length.
  * @param {String} text The text to be split.
  * @param {Number} length The length of the chunks.
+ * @param {Boolean} [startFromRight=false] If true, the text will be split from the right.
  * @returns {String[]} An array of strings.
  * @example
  * splitEvery("123456789", 3) // ["123", "456", "789"]
  * splitEvery("123456789", 4) // ["1234", "5678", "9"]
  * splitEvery("123456789", 5) // ["12345", "6789"] 
 */
-const splitEvery = (text, length) => {
+const splitEvery = (text, length, startFromRight=false) => {
 	let result = [];
 	for (let i = 0; i < text.length; i += length) {
-		result.push(text.slice(i, i + length));
+		if (startFromRight) {
+			result.push(text.slice((text.length - i - length > 0) ? text.length - i - length : 0, (text.length - i > text.length % length) ? text.length - i : text.length % length));
+		} else {
+			result.push(text.slice(i, i + length));
+		}
 	}
 	return result;
 }
@@ -126,6 +177,62 @@ const splitEqually = (text, numberOfChunks) => {
 		result.push(text.slice(i, i + chunkSize + (i < remainder ? 1 : 0)));
 	}
 	return result;
+}
+
+/**
+ * Prettyfies the number by adding the specified delimiter for thousands and decimals.
+ * @param {Number} number The number to be prettified.
+ * @param {Number} [round=0] The number of decimals to round to. Defaults to 0. If negative, the number will be rounded in decimal places.
+ * @param {Number} [padZeroLength=0] The length that the prettified number should have padded with zeros. Defaults to 0.
+ * @param {String} [delimiter1000=","] The delimiter for thousands. Defaults to comma.
+ * @param {String} [delimiterDecimal="."] The delimiter for decimals. Defaults to dot.
+ * @returns {String} The prettified number.
+ * @example
+ * prettifyNumber(123456789) // "123,456,789"
+ * prettifyNumber(123456789, ".", ",") // "123.456.789"
+ * prettifyNumber(123456789.123, ".", ",") // "123.456.789,123"
+*/
+const prettifyNumber = (number = 0, round = 0, padZeroLength = 0, delimiter1000 = ',', delimiterDecimal = '.') => {
+	const numStr = number.toString();
+	let result = "", j = 0;
+	const [num, dec] = numStr.includes(".") ? numStr.split(".") : [numStr, ""];
+	result = splitEvery(num, 3, true).reverse().join(delimiter1000);
+	// for (let i = num.length - 1; i >= 0; i--) {
+	// 	result = num[i] + result;
+	// 	j++;
+	// 	if (j % 3 === 0 && i !== 0) {
+	// 		result = delimiter1000 + result;
+	// 	}
+	// }
+	if (dec !== "") {
+		if (round < 0) {
+			const capped = dec.substring(0, -round);
+			let rounded = ((dec[capped.length] < 5) ? capped : pad((parseInt(capped) + 1).toString(), capped.length, "0")); // Edge case for .9 not caught
+			console.log(pad((parseInt(capped) + 1).toString(), capped.length, "0"));
+			if (rounded.length > capped.length) rounded = rounded.substring(rounded.length-capped.length);
+			result += delimiterDecimal + (((rounded.match(/0/g) || []).length == rounded.length) ? "0"  : rounded);
+		} else result += delimiterDecimal + dec;
+	}
+	return pad(result, padZeroLength, "0");
+}
+
+console.log(prettifyNumber(123456789.999, -2, 5, ".", ","));
+
+/**
+ * Prettifys the array by joining the elements with the specified joint and specialLast.
+ * @param {Array} array The array to be prettified.
+ * @param {String} [joint=", "] The joint to join the elements with. Defaults to comma and space.
+ * @param {String} [specialLast=joint] The joint to join the last element with. Defaults to {@link joint}.
+ * @returns {String} The prettified array.
+ * @example
+ * prettifyArray(["a", "b", "c"]) // "a, b, c"
+ * prettifyArray(["a", "b", "c"], " and ") // "a and b and c"
+ * prettifyArray(["a", "b", "c"], " and ", " and also ") // "a and b and also c"
+*/
+const prettifyArray = (array, joint = ', ', specialLast = joint) => {
+	if (array.length === 0) return "";
+	if (array.length === 1) return array[0];
+	return array.slice(0, -1).join(joint) + specialLast + array[array.length - 1];
 }
 
 
@@ -547,4 +654,33 @@ const fairRandom = (min, max) => {
 	for (let i = min; i < max; i++) {
 		if (r < (i + 1) / (max - min)) return i;
 	}
+}
+
+
+/**
+ * Round a number to the next best number
+ * @param {number} number - The number to round
+ * @param {boolean} onlyBaseTen - Whether to only round to the next base 10 number. Defaults to false
+ * @param {boolean} roundDown - Whether to round down. Defaults to true
+ * @return {number} The rounded number
+ * @example
+ * roundToNextBest(1234) // 1000
+ * roundToNextBest(1234, true) // 1000
+ * roundToNextBest(1234, true, false) // 10000
+ * roundToNextBest(1234, true, false) // 2000
+ * roundToNextBest(0.1234) // 0.1
+*/
+const roundToNextBest = (number, onlyBaseTen = false, roundDown = true) => {
+	let res = 0;
+	let multi = 0;
+	const splitNumber = number.toString().split('.');
+	const decimalPlaces = splitNumber[1] ? splitNumber[1].length - parseInt(splitNumber[1]).toString().length : 0;
+	if (parseInt(splitNumber[0]) != 0) {
+		multi = onlyBaseTen ? 1 : (splitNumber[0][0]);
+		res = multi * (10 ** (splitNumber[0].length - (roundDown ? 1 : 0)));
+	} else {
+		multi = onlyBaseTen ? 1 : (parseInt(splitNumber[1]).toString()[0] - (roundDown ? 0 : -1));
+		res = Math.round(multi * (10 ** (-decimalPlaces - (roundDown ? 1 : 0))) * 10 ** decimalPlaces) / 10 ** decimalPlaces;
+	}
+	return res;
 }
